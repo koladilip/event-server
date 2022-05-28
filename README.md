@@ -34,4 +34,4 @@ Delivers events from each destination topic to corresponding endpoint.
 1. `cd event-server`
 1. Run server: `rm -rf server.log && go run main.go > server.log 2>&1`
 1. Run test script: `go run test/main.go`
-1. Check results: `tail -f server.go`
+1. Check results: `tail -f server.log`
