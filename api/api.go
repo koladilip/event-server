@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/koladilip/event-server/config"
+	"github.com/koladilip/event-server/event"
+	"github.com/koladilip/event-server/store"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"koladilip.github.io/event-server/config"
-	"koladilip.github.io/event-server/event"
-	"koladilip.github.io/event-server/store"
 )
 
 func NewRouter() *gin.Engine {

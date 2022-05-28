@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/koladilip/event-server/api"
+	"github.com/koladilip/event-server/config"
+	"github.com/koladilip/event-server/destination"
+	"github.com/koladilip/event-server/source"
+	"github.com/koladilip/event-server/store"
 	"go.uber.org/fx"
-	"koladilip.github.io/event-server/api"
-	"koladilip.github.io/event-server/config"
-	"koladilip.github.io/event-server/destination"
-	"koladilip.github.io/event-server/source"
-	"koladilip.github.io/event-server/store"
 )
 
 func main() {

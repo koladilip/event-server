@@ -1,4 +1,4 @@
-module koladilip.github.io/event-server
+module github.com/koladilip/event-server
 
 go 1.18
 

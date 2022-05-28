@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/koladilip/event-server/event"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"koladilip.github.io/event-server/event"
 )
 
 type Transformer struct {
@@ -31,8 +31,8 @@ func (transformer *Transformer) TransformAndStore(ctx context.Context,
 			destinationPayload, err = json.Marshal(destinationEvent)
 		}
 		if err != nil {
-			transformer.logger.Error("Error in transforming event", 
-			zap.Any("sourceEvent", sourceEvent), zap.String("Destination", id))
+			transformer.logger.Error("Error in transforming event",
+				zap.Any("sourceEvent", sourceEvent), zap.String("Destination", id))
 			return err
 		}
 		messages = append(messages, kafka.Message{

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"koladilip.github.io/event-server/utils"
+	"github.com/koladilip/event-server/utils"
 )
 
 func publishMessages(userId string) {

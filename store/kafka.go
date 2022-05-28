@@ -1,9 +1,9 @@
 package store
 
 import (
+	"github.com/koladilip/event-server/config"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/fx"
-	"koladilip.github.io/event-server/config"
 )
 
 func NewReader(config *config.Config, topic string, groupId string) *kafka.Reader {

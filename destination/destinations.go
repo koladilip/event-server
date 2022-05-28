@@ -4,9 +4,9 @@ import (
 	"errors"
 	"math/rand"
 
+	"github.com/koladilip/event-server/event"
+	"github.com/koladilip/event-server/utils"
 	"go.uber.org/zap"
-	"koladilip.github.io/event-server/event"
-	"koladilip.github.io/event-server/utils"
 )
 
 type Destination interface {
