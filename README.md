@@ -6,7 +6,7 @@ Sample Event Delivery system using GoLang based on these [requirements](https://
 
 ## Components]
 ### API 
-Receives the events from various customer portals and stores then in Kafka for futher processing.
+Receives the events from various customer portals and stores then in Kafka for futher processing. Source events can be stored in several partitions but we need to store all events of a user ID in the same partition else we can't maintain order.
 
 ### Source Events Reader
 Reads events stored in Kafka topic and hand overs them to transformer.
@@ -23,9 +23,10 @@ type Destination interface {
 	Deliver(event.DestinationEvent) error
 }
 ```
+In order to support Delivery isolation, we are storing destination events in separate topics(one topic will be dedicated for one destination). This way if destination is down then it won't effect other destinations and also we need to maintain order of user events so we make sure that all events of a user ID goes to same parition within the destination topic.
 
 ### Deliverers
-Delivers event from each destination topic to the destination endpoint.
+Delivers events from each destination topic to corresponding endpoint.
 
 ## How to run locally?
 1. Install and start [kafka](https://kafka.apache.org/quickstart)
