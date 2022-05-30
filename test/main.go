@@ -6,13 +6,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/koladilip/event-server/utils"
 	"golang.org/x/sync/errgroup"
 )
 
-func publishMessages(userId string) error {
+func publishMessages(ctx context.Context, userId string) error {
 	for i := 0; i < 100; i++ {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Shutting down")
+			return nil
+		default:
+			fmt.Println("Sending events to", userId)
+		}
 		values := map[string]string{"userId": userId,
 			"payload": fmt.Sprintf("%s: %03d", userId, i)}
 		json_data, err := json.Marshal(values)
@@ -27,18 +36,19 @@ func publishMessages(userId string) error {
 		if err != nil {
 			return err
 		}
-		utils.WaitForRandomPeriod()
 	}
 	return nil
 }
 
 func main() {
-	g, _ := errgroup.WithContext(context.Background())
+	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		return publishMessages("user1")
+		return publishMessages(gCtx, "user1")
 	})
 	g.Go(func() error {
-		return publishMessages("user2")
+		return publishMessages(gCtx, "user2")
 	})
+
 	g.Wait()
 }
