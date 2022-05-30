@@ -2,42 +2,43 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"sync"
-	"time"
 
 	"github.com/koladilip/event-server/utils"
+	"golang.org/x/sync/errgroup"
 )
 
-func publishMessages(userId string) {
-	defer wg.Done()
+func publishMessages(userId string) error {
 	for i := 0; i < 100; i++ {
 		values := map[string]string{"userId": userId,
 			"payload": fmt.Sprintf("%s: %03d", userId, i)}
 		json_data, err := json.Marshal(values)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		_, err = http.Post("http://localhost:8080/publish", "application/json",
 			bytes.NewBuffer(json_data))
 
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		utils.WaitForRandomPeriod()
 	}
+	return nil
 }
 
-var wg sync.WaitGroup
-
 func main() {
-	wg.Add(2)
-	go publishMessages("user1")
-	go publishMessages("user2")
-	wg.Wait()
+	g, _ := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		return publishMessages("user1")
+	})
+	g.Go(func() error {
+		return publishMessages("user2")
+	})
+	g.Wait()
 }
