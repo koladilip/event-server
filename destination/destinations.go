@@ -1,6 +1,7 @@
 package destination
 
 import (
+	"context"
 	"errors"
 	"math/rand"
 
@@ -12,7 +13,7 @@ import (
 type Destination interface {
 	Id() string
 	Transform(event.SourceEvent) (event.DestinationEvent, error)
-	Deliver(event.DestinationEvent) error
+	Deliver(context.Context, event.DestinationEvent) error
 }
 
 type Destination1 struct {
@@ -33,7 +34,7 @@ func (d *Destination1) Transform(e event.SourceEvent) (event.DestinationEvent, e
 	}, nil
 }
 
-func (d *Destination1) Deliver(e event.DestinationEvent) error {
+func (d *Destination1) Deliver(ctx context.Context, e event.DestinationEvent) error {
 	utils.WaitForRandomPeriod()
 	// Hold the logic to push the destination using supported protocol
 	// of the destination
@@ -62,7 +63,7 @@ func (d *Destination2) Transform(e event.SourceEvent) (event.DestinationEvent, e
 	}, nil
 }
 
-func (d *Destination2) Deliver(e event.DestinationEvent) error {
+func (d *Destination2) Deliver(ctx context.Context, e event.DestinationEvent) error {
 	utils.WaitForRandomPeriod()
 	// Hold the logic to push the destination using supported protocol
 	// of the destination

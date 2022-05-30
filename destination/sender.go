@@ -1,7 +1,6 @@
 package destination
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -13,14 +12,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func sendToDestination(logger *zap.Logger, config *config.Config, reader *kafka.Reader, destination Destination) {
-	ctx := context.Background()
+func sendToDestination(logger *zap.Logger, config *config.Config, baseCtx *config.BaseContext,
+	reader *kafka.Reader, destination Destination) {
 	for {
-		if config.Shutdown {
-			logger.Info("Stop sending messages to destination:" + destination.Id())
-			break
-		}
-		m, err := reader.ReadMessage(ctx)
+		m, err := reader.ReadMessage(baseCtx.Context)
 		if err != nil {
 			logger.Error(err.Error())
 			time.Sleep(time.Second)
@@ -29,7 +24,7 @@ func sendToDestination(logger *zap.Logger, config *config.Config, reader *kafka.
 		destEvent, err := event.NewDestinationEvent(m.Value)
 		if err == nil {
 			err = backoff.Retry(func() error {
-				return destination.Deliver(destEvent)
+				return destination.Deliver(baseCtx.Context, destEvent)
 			}, backoff.NewExponentialBackOff())
 		}
 		if err != nil {
@@ -39,10 +34,11 @@ func sendToDestination(logger *zap.Logger, config *config.Config, reader *kafka.
 	}
 }
 
-func StartDestinationSender(logger *zap.Logger, config *config.Config, destinations *map[string]Destination) {
+func StartDestinationSender(logger *zap.Logger, config *config.Config,
+	baseCtx *config.BaseContext, destinations *map[string]Destination) {
 	for id, destination := range *destinations {
 		reader := store.NewReader(config, makeDestinationTopicName(id), fmt.Sprintf("%s-reader", id))
 		// Simulating multiple systems
-		go sendToDestination(logger, config, reader, destination)
+		go sendToDestination(logger, config, baseCtx, reader, destination)
 	}
 }

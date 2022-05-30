@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,15 +54,18 @@ func RegisterPublishAPI(logger *zap.Logger,
 	})
 }
 
-func NewServer(config *config.Config, router *gin.Engine) *http.Server {
+func NewServer(ctx *config.BaseContext, config *config.Config, router *gin.Engine) *http.Server {
 	return &http.Server{
 		Addr:    config.Server.Port,
 		Handler: router,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx.Context
+		},
 	}
 }
 
-func StartServer(lc fx.Lifecycle, logger *zap.Logger,
-	config *config.Config, server *http.Server) {
+func StartServer(lc fx.Lifecycle, baseCtx *config.BaseContext,
+	logger *zap.Logger, config *config.Config, server *http.Server) {
 	lc.Append(fx.Hook{
 		// To mitigate the impact of deadlocks in application startup and
 		// shutdown, Fx imposes a time limit on OnStart and OnStop hooks. By
@@ -75,8 +79,8 @@ func StartServer(lc fx.Lifecycle, logger *zap.Logger,
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			config.Shutdown = true
 			logger.Info("Stopping HTTP server.")
+			baseCtx.Cancel()
 			return server.Shutdown(ctx)
 		},
 	})

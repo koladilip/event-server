@@ -1,7 +1,6 @@
 package source
 
 import (
-	"context"
 	"time"
 
 	"github.com/koladilip/event-server/config"
@@ -13,15 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func readMessages(logger *zap.Logger, config *config.Config, reader *kafka.Reader, tranformer *destination.Transformer) {
+func readMessages(logger *zap.Logger, config *config.Config, baseCtx *config.BaseContext,
+	reader *kafka.Reader, tranformer *destination.Transformer) {
 
-	ctx := context.Background()
 	for {
-		if config.Shutdown {
-			logger.Info("Stop reading messages from source")
-			break
-		}
-		m, err := reader.ReadMessage(ctx)
+		m, err := reader.ReadMessage(baseCtx.Context)
 		if err != nil {
 			logger.Error(err.Error())
 			time.Sleep(time.Second)
@@ -29,7 +24,7 @@ func readMessages(logger *zap.Logger, config *config.Config, reader *kafka.Reade
 
 		sourceEvent, err := event.NewSourceEvent(m.Value)
 		if err == nil {
-			err = tranformer.TransformAndStore(ctx, sourceEvent)
+			err = tranformer.TransformAndStore(baseCtx.Context, sourceEvent)
 		}
 		if err != nil {
 			logger.Error(err.Error())
@@ -39,11 +34,11 @@ func readMessages(logger *zap.Logger, config *config.Config, reader *kafka.Reade
 }
 
 func StartSourceReaders(logger *zap.Logger, config *config.Config,
-	transformer *destination.Transformer) {
+	baseCtx *config.BaseContext, transformer *destination.Transformer) {
 	reader := store.NewReader(config, store.SourceEventTopic, "source-events-reader")
 	// Simulating parallel processing
-	go readMessages(logger, config, reader, transformer)
-	go readMessages(logger, config, reader, transformer)
+	go readMessages(logger, config, baseCtx, reader, transformer)
+	go readMessages(logger, config, baseCtx, reader, transformer)
 }
 
 var Fx = fx.Options(fx.Invoke(StartSourceReaders))

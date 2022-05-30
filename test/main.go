@@ -16,7 +16,7 @@ func publishMessages(userId string) {
 	defer wg.Done()
 	for i := 0; i < 100; i++ {
 		values := map[string]string{"userId": userId,
-			"payload": fmt.Sprintf("%s: %s", userId, time.Now().String())}
+			"payload": fmt.Sprintf("%s: %03d", userId, i)}
 		json_data, err := json.Marshal(values)
 
 		if err != nil {

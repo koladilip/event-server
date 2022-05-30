@@ -1,8 +1,11 @@
 package config
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
@@ -43,7 +46,7 @@ func readConfig(logger *zap.Logger) *Config {
 	if err := viper.Unmarshal(&configuration); err != nil {
 		logger.Fatal("Unable to decode into struct", zap.Error(err))
 	}
-	
+
 	return configuration
 }
 
@@ -73,7 +76,13 @@ func NewLogger() *zap.Logger {
 	return logger
 }
 
+func NewContext() *BaseContext {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	return &BaseContext{Context: ctx, Cancel: cancel}
+}
+
 var Fx = fx.Options(
 	fx.Provide(NewLogger),
 	fx.Provide(NewConfig),
+	fx.Provide(NewContext),
 )
