@@ -38,7 +38,7 @@ func (d *Destination1) Deliver(ctx context.Context, e event.DestinationEvent) er
 	utils.WaitForRandomPeriod()
 	// Hold the logic to push the destination using supported protocol
 	// of the destination
-	if rand.Intn(100) > 70 {
+	if rand.Intn(100) > 90 {
 		return errors.New("some error")
 	} else {
 		d.logger.Info("Delivered to destination1", zap.Any("event", e))
@@ -67,7 +67,7 @@ func (d *Destination2) Deliver(ctx context.Context, e event.DestinationEvent) er
 	utils.WaitForRandomPeriod()
 	// Hold the logic to push the destination using supported protocol
 	// of the destination
-	if rand.Intn(100) > 30 {
+	if rand.Intn(100) > 10 {
 		return errors.New("some error")
 	} else {
 		d.logger.Info("Delivered to destination2", zap.Any("event", e))

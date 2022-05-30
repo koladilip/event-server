@@ -8,6 +8,7 @@ import (
 	"github.com/koladilip/event-server/config"
 	"github.com/koladilip/event-server/event"
 	"github.com/koladilip/event-server/store"
+	"github.com/koladilip/event-server/utils"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 )
@@ -22,14 +23,18 @@ func sendToDestination(logger *zap.Logger, config *config.Config, baseCtx *confi
 		}
 
 		destEvent, err := event.NewDestinationEvent(m.Value)
-		if err == nil {
-			err = backoff.Retry(func() error {
-				return destination.Deliver(baseCtx.Context, destEvent)
-			}, backoff.NewExponentialBackOff())
-		}
-		if err != nil {
-			logger.Error(err.Error())
-			//TODO handle this error gracefully
+		for {
+			if err == nil {
+				err = backoff.Retry(func() error {
+					return destination.Deliver(baseCtx.Context, destEvent)
+				}, backoff.NewExponentialBackOff())
+			}
+			if err != nil {
+				logger.Error(err.Error())
+				utils.WaitForRandomPeriod()
+				continue
+			}
+			break
 		}
 	}
 }

@@ -25,7 +25,7 @@ type Destination interface {
 ```
 In order to support Delivery isolation, we are storing destination events in separate topics(one topic will be dedicated for one destination). This way if destination is down then it won't effect other destinations and also we need to maintain order of user events so we make sure that all events of a user ID goes to same parition within the destination topic.
 
-### Deliverers
+### Senders
 Delivers events from each destination topic to corresponding endpoint.
 
 ## How to run locally?
